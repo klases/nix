@@ -5,11 +5,13 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable"; # Use stable channel
     nix-darwin.url = "github:LnL7/nix-darwin/master";
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
+    nix-homebrew.url = "github:zhaofengli/nix-homebrew";
+    nix-homebrew.inputs.nixpkgs.follows = "nixpkgs"; # Ensure it follows nixpkgs version
     mac-app-util.url = "github:hraban/mac-app-util";
     mac-app-util.inputs.nixpkgs.follows = "nixpkgs"; # Ensure correct nixpkgs version
   };
 
-  outputs = { self, nix-darwin, nixpkgs, mac-app-util }: # Include mac-app-util here
+  outputs = { self, nix-darwin, nixpkgs, mac-app-util, nix-homebrew }: # Include mac-app-util here
     let
       configuration = { pkgs, ... }: {
         nixpkgs.config.allowUnfree = true;
@@ -61,6 +63,22 @@
         modules = [
           configuration
           mac-app-util.darwinModules.default # Ensure this is recognized
+          nix-homebrew.darwinModules.nix-homebrew
+          {
+            nix-homebrew = {
+              # Install Homebrew under the default prefix
+              enable = true;
+
+              # Apple Silicon Only: Also install Homebrew under the default Intel prefix for Rosetta 2
+              enableRosetta = true;
+
+              # User owning the Homebrew prefix
+              user = "claeseklund";
+
+              # Automatically migrate existing Homebrew installations
+              autoMigrate = true;
+            };
+          }
         ];
       };
     };
