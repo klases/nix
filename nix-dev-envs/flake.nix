@@ -70,15 +70,44 @@
         # Java 8 WebApp Environment (inherits base settings)
         webapp = baseShell {
           extraPackages = with pkgs; [
-            openjdk8
-            groovy
-            grails
           ];
           extraShellHook = ''
-            export JAVA_HOME=${pkgs.openjdk8}/lib/openjdk
-            export PATH=$JAVA_HOME/bin:$PATH
+            export SDKMAN_DIR="$HOME/.sdkman"
+            if [ ! -d "$SDKMAN_DIR" ]; then
+              echo "Installing SDKMAN!..."
+              curl -s "https://get.sdkman.io" | bash
+            fi
 
-            echo "Java 8 WebApp environment loaded!"
+            # Initialize SDKMAN!
+            source "$SDKMAN_DIR/bin/sdkman-init.sh"
+
+            # Install required versions (only if not already installed)
+            sdk install java 8.0.312-zulu
+            sdk install groovy 2.5.13
+            sdk install grails 2.5.6
+
+            # Set default versions
+            sdk use java 8.0.312-zulu
+            sdk use groovy 2.5.13
+            sdk use grails 2.5.6
+
+            # Increase Java memory limit
+            export JAVA_TOOL_OPTIONS="-Xmx8G"
+
+            export GRAILS_HOME="$HOME/.sdkman/candidates/grails/current"
+
+            SPRINGLOADED_JAR="$GRAILS_HOME/lib/org.springframework/springloaded/jars/springloaded-1.2.4.RELEASE.jar"
+            if [ ! -f "$SPRINGLOADED_JAR" ]; then
+              echo "Patching Springloaded module..."
+              mkdir -p "$(dirname "$SPRINGLOADED_JAR")"
+              curl -sL "https://repo1.maven.org/maven2/org/springframework/springloaded/1.2.4.RELEASE/springloaded-1.2.4.RELEASE.jar" -o "$SPRINGLOADED_JAR"
+              chmod +r "$SPRINGLOADED_JAR"
+            fi
+
+
+            echo "Java memory limit increased to 8G"
+
+            echo "WebApp environment loaded with SDKMAN!"
           '';
         };
 
