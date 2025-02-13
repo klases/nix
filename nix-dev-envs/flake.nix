@@ -33,13 +33,14 @@
           kube-score
           trivy
           # AWS
-          awscli2
+          awscli2 
           aws-sam-cli
           ssm-session-manager-plugin
           eksctl
           # Node.js
           nodejs
-          nodePackages_latest.aws-cdk
+          # TODO: add this back when nix packages support a later versions of aws-cdk
+          # nodePackages_latest.aws-cdk 
           nodePackages.cdktf-cli
           # Personal applications
           dbeaver-bin
@@ -51,6 +52,17 @@
           # Start Zsh instead of Bash when entering nix develop
           if [ -z "$IN_NIX_SHELL" ]; then
             exec ${pkgs.zsh}/bin/zsh
+          fi
+
+          CDKVERSION="2.178.2"
+
+          NODE_GLOBAL_BIN="$HOME/.npm-global/bin"
+          mkdir -p "$NODE_GLOBAL_BIN"
+          export PATH="$NODE_GLOBAL_BIN:$PATH"
+
+          if ! command -v cdk &> /dev/null || [[ "$(cdk --version)" != "2.178.2 (build *)" ]]; then
+            echo "Installing AWS CDK $CDKVERSION..."
+            npm install -g aws-cdk@$CDKVERSION --prefix "$HOME/.npm-global"
           fi
 
           # Base cloud configurations
