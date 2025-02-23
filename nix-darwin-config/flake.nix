@@ -1,84 +1,74 @@
 {
-  description = "Example nix-darwin system flake";
+  description = "Nix-darwin system flake for configuring macOS";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable"; # Use stable channel
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     nix-darwin.url = "github:LnL7/nix-darwin/master";
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
     nix-homebrew.url = "github:zhaofengli/nix-homebrew";
-    nix-homebrew.inputs.nixpkgs.follows = "nixpkgs"; # Ensure it follows nixpkgs version
+    nix-homebrew.inputs.nixpkgs.follows = "nixpkgs";
     mac-app-util.url = "github:hraban/mac-app-util";
-    mac-app-util.inputs.nixpkgs.follows = "nixpkgs"; # Ensure correct nixpkgs version
+    mac-app-util.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = { self, nix-darwin, nixpkgs, mac-app-util, nix-homebrew }: # Include mac-app-util here
+  outputs = { self, nixpkgs, nix-darwin, mac-app-util, nix-homebrew }:
     let
-      configuration = { pkgs, ... }: {
-        nixpkgs.config.allowUnfree = true;
-        # Install CLI & GUI applications
-        environment.systemPackages = with pkgs; [
-          # Needed for macOS aliases
-          mkalias
-          # CLI tools
-          neovim
-          zsh # Ensure Zsh is installed
-          zsh-powerlevel10k
-          yq
-          jq
-          wget
-          curl
-          git
-          fswatch
-          tree
-          gnutls
-          gnupg
-          coreutils
-          gnumake
-          openssl
-          # GUI applications
-          discord
-        ];
-
-        # Enable Touch ID authentication for sudo.
-        security.pam.enableSudoTouchIdAuth = true;
-
-        # Necessary for using flakes on this system.
-        nix.settings.experimental-features = "nix-command flakes";
-
-        # Enable alternative shell support in nix-darwin.
-        programs.zsh.enable = true;
-
-        # Set Git commit hash for darwin-version.
-        system.configurationRevision = self.rev or self.dirtyRev or null;
-
-        # Used for backwards compatibility, please read the changelog before changing.
-        system.stateVersion = 6;
-
-        # The platform the configuration will be used on.
-        nixpkgs.hostPlatform = "aarch64-darwin";
+      username = "claeseklund";
+      homeDir = "/Users/${username}"; # ✅ Ensure absolute path
+      pkgs = import nixpkgs {
+        system = "aarch64-darwin";
+        config.allowUnfree = true;
       };
     in
     {
       darwinConfigurations."Claess-MacBook-Pro" = nix-darwin.lib.darwinSystem {
         modules = [
-          configuration
-          mac-app-util.darwinModules.default # Ensure this is recognized
+          # ✅ System-Wide nix-darwin Configuration
+          {
+            nixpkgs.config.allowUnfree = true;
+            nix.settings.experimental-features = "nix-command flakes";
+            security.pam.enableSudoTouchIdAuth = true;
+
+            environment.systemPackages = with pkgs; [
+              mkalias
+              neovim
+              zsh
+              zsh-powerlevel10k
+              zsh-completions
+              yq
+              jq
+              wget
+              curl
+              git
+              fswatch
+              tree
+              gnutls
+              gnupg
+              coreutils
+              gnumake
+              openssl
+              discord
+            ];
+
+            programs.zsh.enable = true;
+            system.configurationRevision = self.rev or self.dirtyRev or null;
+            system.stateVersion = 6;
+            nixpkgs.hostPlatform = "aarch64-darwin";
+          }
+
+          # ✅ nix-homebrew support
           nix-homebrew.darwinModules.nix-homebrew
           {
             nix-homebrew = {
-              # Install Homebrew under the default prefix
               enable = true;
-
-              # Apple Silicon Only: Also install Homebrew under the default Intel prefix for Rosetta 2
-              enableRosetta = true;
-
-              # User owning the Homebrew prefix
-              user = "claeseklund";
-
-              # Automatically migrate existing Homebrew installations
+              user = username;
               autoMigrate = true;
+              enableRosetta = true;
             };
           }
+
+          # ✅ mac-app-util support
+          mac-app-util.darwinModules.default
         ];
       };
     };

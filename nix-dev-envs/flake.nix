@@ -116,6 +116,7 @@
               chmod +r "$SPRINGLOADED_JAR"
             fi
 
+            alias runIdeaWebapp='cd "$HOME/matchi/repos/webapp" && ./run.sh "/Applications/IntelliJ IDEA.app/Contents/MacOS/idea" > /dev/null 2>&1 &'
 
             echo "Java memory limit increased to 8G"
 
