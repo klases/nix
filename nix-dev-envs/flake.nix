@@ -21,6 +21,7 @@
           # bitwarden-desktop other arch
           # bitwarden-cli other arch
           # Core cli tools
+          fastfetch
           # Cloud tools
           terraform
           # Kubernetes
@@ -33,7 +34,7 @@
           kube-score
           trivy
           # AWS
-          awscli2 
+          awscli2
           aws-sam-cli
           ssm-session-manager-plugin
           eksctl
@@ -68,7 +69,8 @@
           # Base cloud configurations
           export AWS_CONFIG_FILE="$HOME/matchi/repos/matchi-utils/aws/config"
 
-          echo "Base environment loaded!"
+          clear
+          fastfetch --iterm /Users/claeseklund/.config/nix/nix-dev-envs/gopher.png --logo-width 50 --logo-height 25
           ${extraShellHook}
         '';
       };
@@ -148,7 +150,6 @@
             export GOPATH=$HOME/go
             export GOPRIVATE="github.com/matchiapp"
             export PATH=$GOPATH/bin:$PATH
-            echo "Golang environment loaded!"
           '';
         };
 
@@ -162,7 +163,6 @@
             export ANDROID_HOME=$HOME/Library/Android/sdk 
             export PATH=$PATH:$ANDROID_HOME/emulator
             export PATH=$PATH:$ANDROID_HOME/platform-tools
-            echo "Android SDK environment loaded!"
           '';
         };
 
@@ -173,7 +173,6 @@
             gh
           ];
           extraShellHook = ''
-            echo "GitHub Workflows environment loaded!"
           '';
         };
 
@@ -184,7 +183,6 @@
             firebase-tools
           ];
           extraShellHook = ''
-            echo "GCP environment loaded!"
           '';
         };
       };

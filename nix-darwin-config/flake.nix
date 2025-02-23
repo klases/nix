@@ -31,6 +31,9 @@
 
             environment.systemPackages = with pkgs; [
               mkalias
+              imgcat
+              imagemagick
+              fastfetch
               neovim
               zsh
               zsh-powerlevel10k
