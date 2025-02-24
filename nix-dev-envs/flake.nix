@@ -45,7 +45,6 @@
           nodePackages.cdktf-cli
           # Personal applications
           dbeaver-bin
-          python39
         ] ++ extraPackages;
         shellHook = ''
           export SHELL=${pkgs.zsh}/bin/zsh
@@ -65,6 +64,11 @@
             echo "Installing AWS CDK $CDKVERSION..."
             npm install -g aws-cdk@$CDKVERSION --prefix "$HOME/.npm-global"
           fi
+
+          # Install https://github.com/sourcemeta/jsonschema
+          # This should allways be installed
+          echo "Installing jsonschema..."
+          npm install --g @sourcemeta/jsonschema --prefix "$HOME/.npm-global"
 
           # Base cloud configurations
           export AWS_CONFIG_FILE="$HOME/matchi/repos/matchi-utils/aws/config"
@@ -157,12 +161,12 @@
         frontend = baseShell {
           extraPackages = with pkgs; [
             bun
-            android-studio
+            # android-studio
           ];
           extraShellHook = ''
-            export ANDROID_HOME=$HOME/Library/Android/sdk 
-            export PATH=$PATH:$ANDROID_HOME/emulator
-            export PATH=$PATH:$ANDROID_HOME/platform-tools
+            # export ANDROID_HOME=$HOME/Library/Android/sdk 
+            # export PATH=$PATH:$ANDROID_HOME/emulator
+            # export PATH=$PATH:$ANDROID_HOME/platform-tools
           '';
         };
 
