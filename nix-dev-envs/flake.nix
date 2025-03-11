@@ -22,6 +22,7 @@
           # bitwarden-cli other arch
           # Core cli tools
           fastfetch
+          postgresql_17
           # Cloud tools
           terraform
           # Kubernetes
