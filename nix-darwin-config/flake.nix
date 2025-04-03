@@ -27,7 +27,8 @@
           {
             nixpkgs.config.allowUnfree = true;
             nix.settings.experimental-features = "nix-command flakes";
-            security.pam.enableSudoTouchIdAuth = true;
+            # security.pam.enableSudoTouchIdAuth = true;
+            security.pam.services.sudo_local.touchIdAuth = true;
 
             environment.systemPackages = with pkgs; [
               mkalias
@@ -50,7 +51,15 @@
               coreutils
               gnumake
               openssl
+              certbot
+              cosign
+              docker-compose
+              docker
+              # UI applications
               discord
+              dbeaver-bin
+              vscode
+              bitwarden-desktop
             ];
 
             programs.zsh.enable = true;

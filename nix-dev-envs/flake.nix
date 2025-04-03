@@ -26,8 +26,6 @@
           # Cloud tools
           terraform
           # Kubernetes
-          certbot
-          cosign
           kubectl
           k9s
           kubectx
@@ -45,7 +43,6 @@
           # nodePackages_latest.aws-cdk 
           nodePackages.cdktf-cli
           # Personal applications
-          dbeaver-bin
         ] ++ extraPackages;
         shellHook = ''
           export SHELL=${pkgs.zsh}/bin/zsh
@@ -74,8 +71,6 @@
           # Base cloud configurations
           export AWS_CONFIG_FILE="$HOME/matchi/repos/matchi-utils/aws/config"
 
-          clear
-          fastfetch --iterm /Users/claeseklund/.config/nix/nix-dev-envs/gopher.png --logo-width 50 --logo-height 25
           ${extraShellHook}
         '';
       };
@@ -155,6 +150,37 @@
             export GOPATH=$HOME/go
             export GOPRIVATE="github.com/matchiapp"
             export PATH=$GOPATH/bin:$PATH
+
+            clear
+            fastfetch --iterm /Users/claeseklund/.config/nix/nix-dev-envs/gopher.png --logo-width 50 --logo-height 25
+          '';
+        };
+
+        keycloak = baseShell {
+          extraPackages = with pkgs; [
+            # This shell is used for development of keycloak and should include all tools needed for development.
+            # Golang
+            go
+            gosec
+            golangci-lint
+            go-tools
+
+            # Frontend tools
+            yarn
+            bun
+
+            # Java
+            jdk21_headless
+            gradle_8
+            gradle-completion
+          ];
+          extraShellHook = ''
+            export GOPATH=$HOME/go
+            export GOPRIVATE="github.com/matchiapp"
+            export PATH=$GOPATH/bin:$PATH
+
+            clear
+            fastfetch --iterm /Users/claeseklund/.config/nix/nix-dev-envs/kcTerm.png --logo-width 50 --logo-height 25
           '';
         };
 
@@ -162,6 +188,7 @@
         frontend = baseShell {
           extraPackages = with pkgs; [
             bun
+            yarn
             # android-studio
           ];
           extraShellHook = ''
