@@ -2,8 +2,8 @@
   description = "Nix-darwin system flake for configuring macOS";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    nix-darwin.url = "github:LnL7/nix-darwin/master";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
+    nix-darwin.url = "github:LnL7/nix-darwin/nix-darwin-25.05";
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
     nix-homebrew.url = "github:zhaofengli/nix-homebrew";
     nix-homebrew.inputs.nixpkgs.follows = "nixpkgs";
@@ -34,6 +34,9 @@
               mkalias
               imgcat
               imagemagick
+              ripgrep
+              fzf
+              bat
               fastfetch
               neovim
               zsh
@@ -59,6 +62,8 @@
               discord
               dbeaver-bin
               vscode
+              zed-editor
+              trivy
               bitwarden-desktop
             ];
 

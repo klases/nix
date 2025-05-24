@@ -15,12 +15,8 @@
       # Base Shell with shared cloud tools + common utilities
       baseShell = { extraPackages ? [ ], extraShellHook ? "" }: pkgs.mkShell {
         packages = with pkgs; [
-          # Password managers
-          #_1password-gui-beta - broken
-          #_1password-cli - broken
-          # bitwarden-desktop other arch
-          # bitwarden-cli other arch
           # Core cli tools
+          gh
           fastfetch
           postgresql_17
           # Cloud tools
