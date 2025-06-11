@@ -35,9 +35,8 @@
           eksctl
           # Node.js
           nodejs
-          # TODO: add this back when nix packages support a later versions of aws-cdk
-          # nodePackages_latest.aws-cdk 
-          nodePackages.cdktf-cli
+          nodePackages.aws-cdk
+          # nodePackages.cdktf-cli # Broken build on 25.05
           # Personal applications
         ] ++ extraPackages;
         shellHook = ''
@@ -48,21 +47,28 @@
             exec ${pkgs.zsh}/bin/zsh
           fi
 
-          CDKVERSION="2.178.2"
-
           NODE_GLOBAL_BIN="$HOME/.npm-global/bin"
           mkdir -p "$NODE_GLOBAL_BIN"
           export PATH="$NODE_GLOBAL_BIN:$PATH"
-
-          if ! command -v cdk &> /dev/null || [[ "$(cdk --version)" != "2.178.2 (build *)" ]]; then
-            echo "Installing AWS CDK $CDKVERSION..."
-            npm install -g aws-cdk@$CDKVERSION --prefix "$HOME/.npm-global"
-          fi
 
           # Install https://github.com/sourcemeta/jsonschema
           # This should allways be installed
           echo "Installing jsonschema..."
           npm install --g @sourcemeta/jsonschema --prefix "$HOME/.npm-global"
+
+          # Install cdktf-cli manually if not found
+          echo "Checking for cdktf-cli..."
+          if ! command -v cdktf &> /dev/null; then
+            echo "cdktf-cli not found, installing globally with npm..."
+            npm install --global cdktf-cli --prefix "$HOME/.npm-global"
+            if [ $? -eq 0 ]; then
+              echo "cdktf-cli installed successfully."
+            else
+              echo "Error: Failed to install cdktf-cli." >&2
+            fi
+          else
+            echo "cdktf-cli already installed."
+          fi
 
           # Base cloud configurations
           export AWS_CONFIG_FILE="$HOME/matchi/repos/matchi-utils/aws/config"
@@ -188,9 +194,9 @@
             # android-studio
           ];
           extraShellHook = ''
-            # export ANDROID_HOME=$HOME/Library/Android/sdk 
-            # export PATH=$PATH:$ANDROID_HOME/emulator
-            # export PATH=$PATH:$ANDROID_HOME/platform-tools
+            export ANDROID_HOME=$HOME/Library/Android/sdk 
+            export PATH=$PATH:$ANDROID_HOME/emulator
+            export PATH=$PATH:$ANDROID_HOME/platform-tools
           '';
         };
 
