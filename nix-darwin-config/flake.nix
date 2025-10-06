@@ -3,6 +3,7 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     nix-darwin.url = "github:LnL7/nix-darwin/nix-darwin-25.05";
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
     nix-homebrew.url = "github:zhaofengli/nix-homebrew";
@@ -11,11 +12,15 @@
     mac-app-util.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = { self, nixpkgs, nix-darwin, mac-app-util, nix-homebrew }:
+  outputs = { self, nixpkgs, nixpkgs-unstable, nix-darwin, mac-app-util, nix-homebrew }:
     let
       username = "claeseklund";
       homeDir = "/Users/${username}"; # ✅ Ensure absolute path
       pkgs = import nixpkgs {
+        system = "aarch64-darwin";
+        config.allowUnfree = true;
+      };
+      pkgs-unstable = import nixpkgs-unstable {
         system = "aarch64-darwin";
         config.allowUnfree = true;
       };
@@ -40,7 +45,7 @@
               fastfetch
               neovim
               zsh
-              zsh-powerlevel10k
+              # zsh-powerlevel10k
               zsh-completions
               yq
               jq
@@ -61,10 +66,14 @@
               # UI applications
               discord
               dbeaver-bin
+              bruno
               vscode
-              zed-editor
               trivy
               bitwarden-desktop
+              starship
+
+              pkgs-unstable.zed-editor
+              pkgs-unstable.ghostty-bin
             ];
 
             programs.zsh.enable = true;

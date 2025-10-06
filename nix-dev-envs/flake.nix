@@ -19,6 +19,9 @@
           gh
           fastfetch
           postgresql_17
+          act
+          bruno-cli
+          restish
           # Cloud tools
           terraform
           # Kubernetes
@@ -30,12 +33,12 @@
           trivy
           # AWS
           awscli2
-          aws-sam-cli
+          # aws-sam-cli
           ssm-session-manager-plugin
           eksctl
           # Node.js
           nodejs
-          nodePackages.aws-cdk
+          # nodePackages.aws-cdk
           # nodePackages.cdktf-cli # Broken build on 25.05
           # Personal applications
         ] ++ extraPackages;
@@ -56,11 +59,39 @@
           echo "Installing jsonschema..."
           npm install --g @sourcemeta/jsonschema --prefix "$HOME/.npm-global"
 
+          echo "Checking for gemini"
+          if ! command -v gemini &> /dev/null; then
+            echo "gemini not found, installing globally with npm"
+            sudo npm install --global @google/gemini-cli
+            if [ $? -eq 0 ]; then
+              echo "gemini installed successfully."
+            else
+              echo "Error: Failed to install gemini." >&2
+            fi
+          else
+            echo "gemini already installed."
+          fi
+
+          # manually install aws-cdk
+          echo "Checking for aws-cdk..."
+          if ! command -v cdk &> /dev/null; then
+            echo "aws-cdk not found, installing globally with npm..."
+            npm install --global aws-cdk --prefix "$HOME/.npm-global"
+            if [ $? -eq 0 ]; then
+              echo "aws-cdk installed successfully."
+            else
+              echo "Error: Failed to install aws-cdk." >&2
+            fi
+          else
+            echo "aws-cdk already installed."
+          fi
+
           # Install cdktf-cli manually if not found
           echo "Checking for cdktf-cli..."
           if ! command -v cdktf &> /dev/null; then
             echo "cdktf-cli not found, installing globally with npm..."
-            npm install --global cdktf-cli --prefix "$HOME/.npm-global"
+            npm install cdktf@0.20.12 --global --prefix "$HOME/.npm-global"
+            npm install --global cdktf-cli@0.20.12 --prefix "$HOME/.npm-global"
             if [ $? -eq 0 ]; then
               echo "cdktf-cli installed successfully."
             else
@@ -100,12 +131,12 @@
             # Install required versions (only if not already installed)
             sdk install java 8.0.312-zulu
             sdk install groovy 2.5.13
-            sdk install grails 2.5.6
+            sdk install grails 3.3.18
 
             # Set default versions
             sdk use java 8.0.312-zulu
             sdk use groovy 2.5.13
-            sdk use grails 2.5.6
+            sdk use grails 3.3.18
 
             # Increase Java memory limit
             export JAVA_TOOL_OPTIONS="-Xmx8G"
@@ -125,16 +156,6 @@
             echo "Java memory limit increased to 8G"
 
             echo "WebApp environment loaded with SDKMAN!"
-          '';
-        };
-
-        # Personal Development Environment (inherits base settings)
-        personal = baseShell {
-          extraPackages = with pkgs; [ openjdk21 ];
-          extraShellHook = ''
-            export JAVA_HOME=${pkgs.openjdk21}/lib/openjdk
-            export PATH=$JAVA_HOME/bin:$PATH
-            echo "Personal environment loaded!"
           '';
         };
 
@@ -177,9 +198,7 @@
             gradle-completion
           ];
           extraShellHook = ''
-            export GOPATH=$HOME/go
             export GOPRIVATE="github.com/matchiapp"
-            export PATH=$GOPATH/bin:$PATH
 
             clear
             fastfetch --iterm /Users/claeseklund/.config/nix/nix-dev-envs/kcTerm.png --logo-width 50 --logo-height 25
@@ -194,9 +213,62 @@
             # android-studio
           ];
           extraShellHook = ''
-            export ANDROID_HOME=$HOME/Library/Android/sdk 
+            export ANDROID_HOME=$HOME/Library/Android/sdk
             export PATH=$PATH:$ANDROID_HOME/emulator
             export PATH=$PATH:$ANDROID_HOME/platform-tools
+          '';
+        };
+
+        # Combined Fullstack (Golang + Frontend + GCP + Personal) Environment
+        fullstack = baseShell {
+          extraPackages = with pkgs; [
+            # From golang
+            go
+            gosec
+            golangci-lint
+            go-tools
+            hugo
+            openapi-generator-cli
+            # From frontend
+            bun
+            yarn
+            # android-studio (if needed, uncomment)
+            # From GCP
+            google-cloud-sdk
+            firebase-tools
+          ];
+          extraShellHook = ''
+            # From golang
+            export GOPATH=$HOME/go
+            export GOPRIVATE="github.com/matchiapp"
+            export PATH=$GOPATH/bin:$PATH
+
+            # From frontend
+            export ANDROID_HOME=$HOME/Library/Android/sdk
+            export PATH=$PATH:$ANDROID_HOME/emulator
+            export PATH=$PATH:$ANDROID_HOME/platform-tools
+
+            # Java needed for GCP and Andriod building
+            export SDKMAN_DIR="$HOME/.sdkman"
+            if [ ! -d "$SDKMAN_DIR" ]; then
+              echo "Installing SDKMAN!..."
+              curl -s "https://get.sdkman.io" | bash
+            fi
+
+            # Initialize SDKMAN!
+            source "$SDKMAN_DIR/bin/sdkman-init.sh"
+            sdk install java 21.0.7-amzn
+            sdk use java 21.0.7-amzn
+
+            # From GCP
+            # No specific shell hooks were defined in the original GCP environment,
+            # but if there were, they would be added here.
+
+            clear
+            # You can choose one of the fastfetch logos or combine them, or remove it.
+            # For example, using the gopher logo:
+            fastfetch --logo-width 50 --logo-height 25
+            echo "Fullstack (Golang + Frontend + GCP + Personal) environment loaded!"
           '';
         };
 
@@ -209,16 +281,7 @@
           extraShellHook = ''
           '';
         };
-
-        # GCP Development Environment (inherits base settings)
-        gcp = baseShell {
-          extraPackages = with pkgs; [
-            google-cloud-sdk
-            firebase-tools
-          ];
-          extraShellHook = ''
-          '';
-        };
       };
     };
 }
+
