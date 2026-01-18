@@ -2,7 +2,7 @@
   description = "Development environments for different projects";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
   };
 
   outputs = { self, nixpkgs }:
@@ -175,7 +175,7 @@
             export PATH=$GOPATH/bin:$PATH
 
             clear
-            fastfetch --iterm /Users/claeseklund/.config/nix/nix-dev-envs/gopher.png --logo-width 50 --logo-height 25
+            fastfetch --kitty-direct /Users/claeseklund/.config/nix/nix-dev-envs/gopher.png --logo-width 50 --logo-height 25
           '';
         };
 
@@ -201,7 +201,7 @@
             export GOPRIVATE="github.com/matchiapp"
 
             clear
-            fastfetch --iterm /Users/claeseklund/.config/nix/nix-dev-envs/kcTerm.png --logo-width 50 --logo-height 25
+            fastfetch --kitty-direct /Users/claeseklund/.config/nix/nix-dev-envs/kcTerm.png --logo-width 50 --logo-height 25
           '';
         };
 
@@ -210,6 +210,7 @@
           extraPackages = with pkgs; [
             bun
             yarn
+            pnpm
             # android-studio
           ];
           extraShellHook = ''

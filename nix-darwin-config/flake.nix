@@ -41,6 +41,7 @@
               imagemagick
               ripgrep
               fzf
+              watchexec
               bat
               fastfetch
               neovim
@@ -71,9 +72,11 @@
               trivy
               bitwarden-desktop
               starship
+              imagemagick
 
               pkgs-unstable.zed-editor
               pkgs-unstable.ghostty-bin
+              pkgs-unstable.claude-code
             ];
 
             programs.zsh.enable = true;
