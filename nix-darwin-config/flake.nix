@@ -10,9 +10,10 @@
     nix-homebrew.inputs.nixpkgs.follows = "nixpkgs";
     mac-app-util.url = "github:hraban/mac-app-util";
     mac-app-util.inputs.nixpkgs.follows = "nixpkgs";
+    zed-editor.url = "github:zed-industries/zed";
   };
 
-  outputs = { self, nixpkgs, nixpkgs-unstable, nix-darwin, mac-app-util, nix-homebrew }:
+  outputs = { self, nixpkgs, nixpkgs-unstable, nix-darwin, mac-app-util, nix-homebrew, zed-editor }:
     let
       username = "claeseklund";
       homeDir = "/Users/${username}"; # ✅ Ensure absolute path
@@ -32,13 +33,18 @@
           {
             nixpkgs.config.allowUnfree = true;
             nix.settings.experimental-features = "nix-command flakes";
+            nix.settings.extra-substituters = [
+              "https://zed.cachix.org"
+            ];
+            nix.settings.extra-trusted-public-keys = [
+              "zed.cachix.org-1:W0gJVb6Bw5JZVf5GUUReBcsBMu+ECbVBfhCphMNzmFI="
+            ];
             # security.pam.enableSudoTouchIdAuth = true;
             security.pam.services.sudo_local.touchIdAuth = true;
 
             environment.systemPackages = with pkgs; [
               mkalias
               imgcat
-              imagemagick
               ripgrep
               fzf
               watchexec
@@ -46,7 +52,6 @@
               fastfetch
               neovim
               zsh
-              # zsh-powerlevel10k
               zsh-completions
               yq
               jq
@@ -72,9 +77,11 @@
               trivy
               bitwarden-desktop
               starship
-              imagemagick
+              btop
+              ncdu
+              duf
 
-              pkgs-unstable.zed-editor
+              zed-editor.packages.aarch64-darwin.default
               pkgs-unstable.ghostty-bin
               pkgs-unstable.claude-code
             ];

@@ -41,6 +41,7 @@
           # nodePackages.aws-cdk
           # nodePackages.cdktf-cli # Broken build on 25.05
           # Personal applications
+          gemini-cli
         ] ++ extraPackages;
         shellHook = ''
           export SHELL=${pkgs.zsh}/bin/zsh
@@ -58,19 +59,6 @@
           # This should allways be installed
           echo "Installing jsonschema..."
           npm install --g @sourcemeta/jsonschema --prefix "$HOME/.npm-global"
-
-          echo "Checking for gemini"
-          if ! command -v gemini &> /dev/null; then
-            echo "gemini not found, installing globally with npm"
-            sudo npm install --global @google/gemini-cli
-            if [ $? -eq 0 ]; then
-              echo "gemini installed successfully."
-            else
-              echo "Error: Failed to install gemini." >&2
-            fi
-          else
-            echo "gemini already installed."
-          fi
 
           # manually install aws-cdk
           echo "Checking for aws-cdk..."
