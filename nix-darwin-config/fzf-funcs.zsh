@@ -47,7 +47,7 @@ vf() {
 
 FZF_PROJECT_ROOTS=(~/matchi ~/projects ~/lab ~/work)
 
-vscd() {
+zcd() {
   local dir
   dir=$( (find "${FZF_PROJECT_ROOTS[@]}" -type d -not -path '*/\.*' 2>/dev/null;
           find . -type d -not -path '*/\.*' 2>/dev/null) | \
@@ -56,7 +56,7 @@ vscd() {
         --preview 'ls -la {}' \
         --prompt="Open folder > ")
 
-  [[ -n "$dir" ]] && code "$dir" && cd "$dir"
+  [[ -n "$dir" ]] && zed "$dir" && cd "$dir"
 }
 
 fzf-help() {
@@ -76,8 +76,8 @@ fshow              Fuzzy browse recent Git commits with preview
 vf    <keyword>     Fuzzy locate files using `locate` and open in Neovim
                     Example: vf docker-compose
 
-vscd                Fuzzy search folders from key locations and open in VS Code
-                    Example: vscd
+zcd                Fuzzy search folders from key locations and open in VS Code
+                    Example: zcd
 
 ghwf                Fuzzy browse recent GitHub Actions workflow runs
                     Requires: \$GH_WORKFLOW_REPOS set to repos (e.g. "org/repo1 org/repo2")
@@ -89,7 +89,7 @@ ghwf                Fuzzy browse recent GitHub Actions workflow runs
 Tips:
 • All fzf windows support typing, arrow keys, and ENTER to select
 • `ctrl-s` in fshow toggles sorting
-• `vscd` searches in: ${FZF_PROJECT_ROOTS[*]}
+• `zcd` searches in: ${FZF_PROJECT_ROOTS[*]}
 
 EOF
 }

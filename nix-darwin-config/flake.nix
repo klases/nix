@@ -15,14 +15,15 @@
 
   outputs = { self, nixpkgs, nixpkgs-unstable, nix-darwin, mac-app-util, nix-homebrew, zed-editor }:
     let
+      system = "aarch64-darwin";
       username = "claeseklund";
       homeDir = "/Users/${username}"; # ✅ Ensure absolute path
       pkgs = import nixpkgs {
-        system = "aarch64-darwin";
+        inherit system;
         config.allowUnfree = true;
       };
       pkgs-unstable = import nixpkgs-unstable {
-        system = "aarch64-darwin";
+        inherit system;
         config.allowUnfree = true;
       };
     in
@@ -73,7 +74,6 @@
               discord
               dbeaver-bin
               bruno
-              vscode
               trivy
               bitwarden-desktop
               starship
@@ -81,7 +81,7 @@
               ncdu
               duf
 
-              zed-editor.packages.aarch64-darwin.default
+              zed-editor.packages.${system}.default
               pkgs-unstable.ghostty-bin
               pkgs-unstable.claude-code
             ];
@@ -89,7 +89,7 @@
             programs.zsh.enable = true;
             system.configurationRevision = self.rev or self.dirtyRev or null;
             system.stateVersion = 6;
-            nixpkgs.hostPlatform = "aarch64-darwin";
+            nixpkgs.hostPlatform = system;
           }
 
           # ✅ nix-homebrew support

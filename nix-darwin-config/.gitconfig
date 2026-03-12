@@ -1,9 +1,11 @@
 [user]
 	name = Claes Eklund
-	email = claekl.eklund@gmail.com
+	email = claes.eklund+git@pm.me
 	signingkey = /Users/claeseklund/.ssh/id_matchi.pub
 
 [alias]
+
+diff-main = !/Users/claeseklund/workspace/projects/workspace-utils/git-diff-main
 
 # Show all of my configured aliases
 aliases = !git config --list | grep 'alias\\.' | sed 's/alias\\.\\([^=]*\\)=\\(.*\\)/\\1\\ \t => \\2/' | sort
@@ -51,7 +53,7 @@ subup = submodule update --init
 tags = tag -l
 
 # Start a new local repository and perform initial commit
-this = !git init && git add . && git commmit -m \"Initial commit.\"
+this = !git init && git add . && git commit -m \"Initial commit.\"
 
 # Thin out older metadata within the repository, reduceses filesystem footprint
 trim = !git reflog expire --expire=now --all && git gc --prune=now
@@ -62,10 +64,6 @@ st = status
 
 pullr = pull --rebase --autostash
 
-########### GIT SVN ###########
-svnr = svn rebase
-svnd = svn dcommit
-svnl = svn log --oneline --show-commit
 	build = "!a() {\nlocal _scope _attention _message\nwhile [ $# -ne 0 ]; do\ncase $1 in\n  -s | --scope )\n    if [ -z $2 ]; then\n      echo \"Missing scope!\"\n      return 1\n    fi\n    _scope=\"$2\"\n    shift 2\n    ;;\n  -a | --attention )\n    _attention=\"!\"\n    shift 1\n    ;;\n  * )\n    _message=\"${_message} $1\"\n    shift 1\n    ;;\nesac\ndone\ngit commit -m \"build${_scope:+(${_scope})}${_attention}:${_message}\"\n}; a"
 	chore = "!a() {\nlocal _scope _attention _message\nwhile [ $# -ne 0 ]; do\ncase $1 in\n  -s | --scope )\n    if [ -z $2 ]; then\n      echo \"Missing scope!\"\n      return 1\n    fi\n    _scope=\"$2\"\n    shift 2\n    ;;\n  -a | --attention )\n    _attention=\"!\"\n    shift 1\n    ;;\n  * )\n    _message=\"${_message} $1\"\n    shift 1\n    ;;\nesac\ndone\ngit commit -m \"chore${_scope:+(${_scope})}${_attention}:${_message}\"\n}; a"
 	ci = "!a() {\nlocal _scope _attention _message\nwhile [ $# -ne 0 ]; do\ncase $1 in\n  -s | --scope )\n    if [ -z $2 ]; then\n      echo \"Missing scope!\"\n      return 1\n    fi\n    _scope=\"$2\"\n    shift 2\n    ;;\n  -a | --attention )\n    _attention=\"!\"\n    shift 1\n    ;;\n  * )\n    _message=\"${_message} $1\"\n    shift 1\n    ;;\nesac\ndone\ngit commit -m \"ci${_scope:+(${_scope})}${_attention}:${_message}\"\n}; a"
@@ -78,11 +76,8 @@ svnl = svn log --oneline --show-commit
 	style = "!a() {\nlocal _scope _attention _message\nwhile [ $# -ne 0 ]; do\ncase $1 in\n  -s | --scope )\n    if [ -z $2 ]; then\n      echo \"Missing scope!\"\n      return 1\n    fi\n    _scope=\"$2\"\n    shift 2\n    ;;\n  -a | --attention )\n    _attention=\"!\"\n    shift 1\n    ;;\n  * )\n    _message=\"${_message} $1\"\n    shift 1\n    ;;\nesac\ndone\ngit commit -m \"style${_scope:+(${_scope})}${_attention}:${_message}\"\n}; a"
 	test = "!a() {\nlocal _scope _attention _message\nwhile [ $# -ne 0 ]; do\ncase $1 in\n  -s | --scope )\n    if [ -z $2 ]; then\n      echo \"Missing scope!\"\n      return 1\n    fi\n    _scope=\"$2\"\n    shift 2\n    ;;\n  -a | --attention )\n    _attention=\"!\"\n    shift 1\n    ;;\n  * )\n    _message=\"${_message} $1\"\n    shift 1\n    ;;\nesac\ndone\ngit commit -m \"test${_scope:+(${_scope})}${_attention}:${_message}\"\n}; a"
 	wip = "!a() {\nlocal _scope _attention _message\nwhile [ $# -ne 0 ]; do\ncase $1 in\n  -s | --scope )\n    if [ -z $2 ]; then\n      echo \"Missing scope!\"\n      return 1\n    fi\n    _scope=\"$2\"\n    shift 2\n    ;;\n  -a | --attention )\n    _attention=\"!\"\n    shift 1\n    ;;\n  * )\n    _message=\"${_message} $1\"\n    shift 1\n    ;;\nesac\ndone\ngit commit -m \"wip${_scope:+(${_scope})}${_attention}:${_message}\"\n}; a"
+	cleanup-branches = "!f() { echo 'Fetching latest remote info...'; git fetch --prune; echo ''; CURRENT=$(git branch --show-current); CANDIDATES=$(comm -23 <(git branch | sed 's/^..//' | grep -v \"^${CURRENT}$\" | sort) <(git branch -r | sed 's/.*origin\\///' | sort)); if [ -z \"$CANDIDATES\" ]; then echo '✓ No branches to clean up. All local branches have remotes.'; exit 0; fi; SELECTED=$(echo \"$CANDIDATES\" | fzf --multi --header 'Select branches to delete (Tab=select, Enter=confirm, Esc=cancel)' --preview 'echo \"=== Last Commit ===\"; git log -1 --format=\"%h %s%n%nAuthor: %an%nDate:   %ar\" {}; echo \"\"; echo \"=== GitHub PR ===\"; gh pr list --head {} --state all --json number,title,state,mergedAt --jq \".[] | \\\"PR #\\(.number): \\(.state)\\n\\(.title)\\(if .mergedAt then \\\"\\nMerged: \\\" + .mergedAt else \\\"\\\" end)\\\"\" 2>/dev/null || echo \"No PR found\"' --preview-window=right:50% --prompt 'Delete branches> '); if [ -z \"$SELECTED\" ]; then echo 'No branches selected.'; exit 0; fi; echo ''; echo 'Deleting selected branches:'; echo \"$SELECTED\" | while read -r branch; do echo \"  - $branch\"; git branch -D \"$branch\"; done; echo ''; echo '✓ Cleanup complete!'; }; f"
 
-
-# Gitlab
-#[url "ssh://git@gitlab.com/"]
-#   insteadOf = https://gitlab.com/
 
 [color]
     ui = true
@@ -111,27 +106,25 @@ filemode = false
 editor = nvim
 	quotepath = false
 
+# Automatically use matchi SSH key for matchiapp repos
+[url "git@github.com-matchi:matchiapp/"]
+    insteadOf = git@github.com:matchiapp/
+
 [push]
-default = simple
-	autoSetupRemote = true
-	autoSetupRemote = false
+	default = simple
 	autoSetupRemote = true
 
-[merge]
-    tool = vscode
-[mergetool "vscode"]
-    cmd = code --wait $MERGED
 [diff]
-    tool = vscode
-[difftool "vscode"]
-    cmd = code --wait --diff $LOCAL $REMOTE
+	tool = zed
+[difftool]
+	prompt = false
+[difftool "zed"]
+	cmd = zed --wait --diff "$LOCAL" "$REMOTE"
 
-[url "ssh://git@github.com/matchiapp/"]
-    insteadOf = https://github.com/matchiapp/
 [fetch]
 	prune = true
 [oh-my-zsh]
-	git-commit-alias = 6e7ac0544e71c7b777746cb50f70de68c6495b86
+	git-commit-alias = 8df5c1b18b1393dc5046c729094f897bd3636a9b
 [commit]
 	gpgsign = true
 [gpg]
