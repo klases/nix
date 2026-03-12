@@ -7,98 +7,96 @@
 
   outputs = { self, nixpkgs }:
     let
-      pkgs = import nixpkgs {
-        system = "aarch64-darwin";
-        config.allowUnfree = true;
-      };
-
-      # Base Shell with shared cloud tools + common utilities
-      baseShell = { extraPackages ? [ ], extraShellHook ? "" }: pkgs.mkShell {
-        packages = with pkgs; [
-          # Core cli tools
-          gh
-          fastfetch
-          postgresql_17
-          act
-          bruno-cli
-          restish
-          # Cloud tools
-          terraform
-          # Kubernetes
-          kubectl
-          k9s
-          kubectx
-          kustomize
-          kube-score
-          trivy
-          # AWS
-          awscli2
-          # aws-sam-cli
-          ssm-session-manager-plugin
-          eksctl
-          # Node.js
-          nodejs
-          # nodePackages.aws-cdk
-          # nodePackages.cdktf-cli # Broken build on 25.05
-          # Personal applications
-          gemini-cli
-        ] ++ extraPackages;
-        shellHook = ''
-          export SHELL=${pkgs.zsh}/bin/zsh
-
-          # Start Zsh instead of Bash when entering nix develop
-          if [ -z "$IN_NIX_SHELL" ]; then
-            exec ${pkgs.zsh}/bin/zsh
-          fi
-
-          NODE_GLOBAL_BIN="$HOME/.npm-global/bin"
-          mkdir -p "$NODE_GLOBAL_BIN"
-          export PATH="$NODE_GLOBAL_BIN:$PATH"
-
-          # Install https://github.com/sourcemeta/jsonschema
-          # This should allways be installed
-          echo "Installing jsonschema..."
-          npm install --g @sourcemeta/jsonschema --prefix "$HOME/.npm-global"
-
-          # manually install aws-cdk
-          echo "Checking for aws-cdk..."
-          if ! command -v cdk &> /dev/null; then
-            echo "aws-cdk not found, installing globally with npm..."
-            npm install --global aws-cdk --prefix "$HOME/.npm-global"
-            if [ $? -eq 0 ]; then
-              echo "aws-cdk installed successfully."
-            else
-              echo "Error: Failed to install aws-cdk." >&2
-            fi
-          else
-            echo "aws-cdk already installed."
-          fi
-
-          # Install cdktf-cli manually if not found
-          echo "Checking for cdktf-cli..."
-          if ! command -v cdktf &> /dev/null; then
-            echo "cdktf-cli not found, installing globally with npm..."
-            npm install cdktf@0.20.12 --global --prefix "$HOME/.npm-global"
-            npm install --global cdktf-cli@0.20.12 --prefix "$HOME/.npm-global"
-            if [ $? -eq 0 ]; then
-              echo "cdktf-cli installed successfully."
-            else
-              echo "Error: Failed to install cdktf-cli." >&2
-            fi
-          else
-            echo "cdktf-cli already installed."
-          fi
-
-          # Base cloud configurations
-          export AWS_CONFIG_FILE="$HOME/matchi/repos/matchi-utils/aws/config"
-
-          ${extraShellHook}
-        '';
-      };
-
+      supportedSystems = [ "aarch64-darwin" "x86_64-darwin" "x86_64-linux" "aarch64-linux" ];
+      forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
     in
     {
-      devShells.aarch64-darwin = {
+      devShells = forAllSystems (system:
+        let
+          pkgs = import nixpkgs {
+            inherit system;
+            config.allowUnfree = true;
+          };
+
+          # Base Shell with shared cloud tools + common utilities
+          baseShell = { extraPackages ? [ ], extraShellHook ? "" }: pkgs.mkShell {
+            packages = with pkgs; [
+              # Core cli tools
+              gh
+              fastfetch
+              postgresql_17
+              act
+              bruno-cli
+              restish
+              # Cloud tools
+              terraform
+              # Kubernetes
+              kubectl
+              k9s
+              kubectx
+              kustomize
+              kube-score
+              trivy
+              # AWS
+              awscli2
+              # aws-sam-cli
+              ssm-session-manager-plugin
+              eksctl
+              # Node.js
+              nodejs
+              # nodePackages.aws-cdk
+              # nodePackages.cdktf-cli # Broken build on 25.05
+              # Personal applications
+              gemini-cli
+            ] ++ extraPackages;
+            shellHook = ''
+              NODE_GLOBAL_BIN="$HOME/.npm-global/bin"
+              mkdir -p "$NODE_GLOBAL_BIN"
+              export PATH="$NODE_GLOBAL_BIN:$PATH"
+
+              # Install https://github.com/sourcemeta/jsonschema
+              if ! command -v jsonschema &> /dev/null; then
+                echo "jsonschema not found, installing globally with npm..."
+                npm install --g @sourcemeta/jsonschema --prefix "$HOME/.npm-global"
+              fi
+
+              # manually install aws-cdk
+              echo "Checking for aws-cdk..."
+              if ! command -v cdk &> /dev/null; then
+                echo "aws-cdk not found, installing globally with npm..."
+                npm install --global aws-cdk --prefix "$HOME/.npm-global"
+                if [ $? -eq 0 ]; then
+                  echo "aws-cdk installed successfully."
+                else
+                  echo "Error: Failed to install aws-cdk." >&2
+                fi
+              else
+                echo "aws-cdk already installed."
+              fi
+
+              # Install cdktf-cli manually if not found
+              echo "Checking for cdktf-cli..."
+              if ! command -v cdktf &> /dev/null; then
+                echo "cdktf-cli not found, installing globally with npm..."
+                npm install cdktf@0.20.12 --global --prefix "$HOME/.npm-global"
+                npm install --global cdktf-cli@0.20.12 --prefix "$HOME/.npm-global"
+                if [ $? -eq 0 ]; then
+                  echo "cdktf-cli installed successfully."
+                else
+                  echo "Error: Failed to install cdktf-cli." >&2
+                fi
+              else
+                echo "cdktf-cli already installed."
+              fi
+
+              # Base cloud configurations
+              export AWS_CONFIG_FILE="$HOME/matchi/repos/matchi-utils/aws/config"
+
+              ${extraShellHook}
+            '';
+          };
+        in
+        {
         # Base Environment (automatically included in all others)
         base = baseShell { };
 
@@ -139,8 +137,6 @@
               chmod +r "$SPRINGLOADED_JAR"
             fi
 
-            alias runIdeaWebapp='cd "$HOME/matchi/repos/webapp" && ./run.sh "/Applications/IntelliJ IDEA.app/Contents/MacOS/idea" > /dev/null 2>&1 &'
-
             echo "Java memory limit increased to 8G"
 
             echo "WebApp environment loaded with SDKMAN!"
@@ -163,7 +159,7 @@
             export PATH=$GOPATH/bin:$PATH
 
             clear
-            fastfetch --kitty-direct /Users/claeseklund/.config/nix/nix-dev-envs/gopher.png --logo-width 50 --logo-height 25
+            fastfetch --kitty-direct $HOME/.config/nix/nix-dev-envs/gopher.png --logo-width 50 --logo-height 25
           '';
         };
 
@@ -189,7 +185,7 @@
             export GOPRIVATE="github.com/matchiapp"
 
             clear
-            fastfetch --kitty-direct /Users/claeseklund/.config/nix/nix-dev-envs/kcTerm.png --logo-width 50 --logo-height 25
+            fastfetch --kitty-direct $HOME/.config/nix/nix-dev-envs/kcTerm.png --logo-width 50 --logo-height 25
           '';
         };
 
@@ -261,16 +257,8 @@
           '';
         };
 
-        # GitHub Workflows Development Environment (inherits base settings)
-        github-workflows = baseShell {
-          extraPackages = with pkgs; [
-            act
-            gh
-          ];
-          extraShellHook = ''
-          '';
-        };
-      };
+        }
+      );
     };
 }
 
