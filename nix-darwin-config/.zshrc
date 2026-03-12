@@ -29,41 +29,40 @@ dev() {
   if [[ -z "$1" ]]; then
     echo "Usage: dev <environment>"
     echo "Available dev environments:"
-    echo " base, webapp, personal, golang, frontend, github-workflows, gcp"
+    echo " base, webapp, golang, keycloak, frontend, fullstack"
     return 1
   fi
   export NIX_DEV_ENV="$1"
-  nix develop ~/.config/nix/nix-dev-envs#"$1" -c $SHELL
+  nix develop ~/.config/nix/nix-dev-envs#"$1" -c zsh
+  unset NIX_DEV_ENV
 }
 
 # Tab completion for `dev` function
 _dev_complete() {
-  reply=("base" "webapp" "golang" "frontend" "github-workflows" "keycloak" "fullstack")
+  reply=("base" "webapp" "golang" "keycloak" "frontend" "fullstack")
 }
 
 compctl -K _dev_complete dev
 
+# Fix $SHELL inside nix develop (it overrides to nix bash)
+if [[ -n "$NIX_DEV_ENV" ]]; then
+  export SHELL=$(command -v zsh)
+fi
 
-cleanup_nix_env() {
-  # If inside a normal shell and `NIX_DEV_ENV` is set, clean it silently
-  if [[ -z "$IN_NIX_SHELL" && -n "$NIX_DEV_ENV" ]]; then
-    echo "Exiting Nix DevShell: Cleaning NIX_DEV_ENV..."
-    unset NIX_DEV_ENV
-  fi
-}
+# Source SDKMAN in zsh for dev shells that need it
+if [[ "$NIX_DEV_ENV" == "webapp" || "$NIX_DEV_ENV" == "fullstack" ]]; then
+  export SDKMAN_DIR="$HOME/.sdkman"
+  [[ -s "$SDKMAN_DIR/bin/sdkman-init.sh" ]] && source "$SDKMAN_DIR/bin/sdkman-init.sh"
+fi
+
 
 runIdeaWebapp() {
     if [[ "$NIX_DEV_ENV" != "webapp" ]]; then
       echo "Not running WebApp: Not in webapp environment"
       return 1
     fi
-    cd "$HOME/matchi/repos/webapp" && ./run.sh "/Applications/IntelliJ IDEA.app/Contents/MacOS/idea" > /dev/null 2>&1 &
+    cd "$HOME/workspace/matchi/webapp" && ./run.sh "/Applications/IntelliJ IDEA.app/Contents/MacOS/idea" "$HOME/workspace/matchi/webapp" > /dev/null 2>&1 &
 }
-
-
-# Run cleanup when a shell exits
-autoload -Uz add-zsh-hook
-add-zsh-hook precmd cleanup_nix_env
 
 # Git identity selector
 _git_identity_session() {
@@ -98,11 +97,6 @@ export SDKMAN_DIR="/Users/claeseklund/.sdkman"
 [[ -s "/Users/claeseklund/.sdkman/bin/sdkman-init.sh" ]] && source "/Users/claeseklund/.sdkman/bin/sdkman-init.sh"
 
 
-# test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
-
 eval "$(starship init zsh)"
 
-
-export PATH="$PATH:$HOME/.dotnet/tools"
-export PATH=$PATH:$HOME/.maestro/bin
 export PATH="$HOME/.local/bin:$PATH"
