@@ -3,9 +3,10 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
+    openspec.url = "github:Fission-AI/OpenSpec";
   };
 
-  outputs = { self, nixpkgs }:
+  outputs = { self, nixpkgs, openspec }:
     let
       supportedSystems = [ "aarch64-darwin" "x86_64-darwin" "x86_64-linux" "aarch64-linux" ];
       forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
@@ -48,6 +49,7 @@
               # nodePackages.cdktf-cli # Broken build on 25.05
               # Personal applications
               gemini-cli
+              openspec.packages.${system}.default
             ] ++ extraPackages;
             shellHook = ''
               NODE_GLOBAL_BIN="$HOME/.npm-global/bin"
@@ -72,7 +74,6 @@
 
               ensure_npm_pkg jsonschema @sourcemeta/jsonschema
               ensure_npm_pkg cdk        aws-cdk
-              ensure_npm_pkg openspec   @fission-ai/openspec@latest
               ensure_npm_pkg cdktf      cdktf@0.20.12 cdktf-cli@0.20.12
 
               # Base cloud configurations
