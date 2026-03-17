@@ -54,40 +54,26 @@
               mkdir -p "$NODE_GLOBAL_BIN"
               export PATH="$NODE_GLOBAL_BIN:$PATH"
 
-              # Install https://github.com/sourcemeta/jsonschema
-              if ! command -v jsonschema &> /dev/null; then
-                echo "jsonschema not found, installing globally with npm..."
-                npm install --g @sourcemeta/jsonschema --prefix "$HOME/.npm-global"
-              fi
-
-              # manually install aws-cdk
-              echo "Checking for aws-cdk..."
-              if ! command -v cdk &> /dev/null; then
-                echo "aws-cdk not found, installing globally with npm..."
-                npm install --global aws-cdk --prefix "$HOME/.npm-global"
-                if [ $? -eq 0 ]; then
-                  echo "aws-cdk installed successfully."
+              # Helper: ensure global npm package(s) are installed
+              # Usage: ensure_npm_pkg <command_to_check> <pkg1> [pkg2 ...]
+              ensure_npm_pkg() {
+                local cmd="$1"; shift
+                if ! command -v "$cmd" &> /dev/null; then
+                  echo "$cmd not found, installing globally..."
+                  if npm install --global "$@" --prefix "$HOME/.npm-global"; then
+                    echo "$cmd installed successfully."
+                  else
+                    echo "Error: Failed to install $cmd." >&2
+                  fi
                 else
-                  echo "Error: Failed to install aws-cdk." >&2
+                  echo "$cmd already installed."
                 fi
-              else
-                echo "aws-cdk already installed."
-              fi
+              }
 
-              # Install cdktf-cli manually if not found
-              echo "Checking for cdktf-cli..."
-              if ! command -v cdktf &> /dev/null; then
-                echo "cdktf-cli not found, installing globally with npm..."
-                npm install cdktf@0.20.12 --global --prefix "$HOME/.npm-global"
-                npm install --global cdktf-cli@0.20.12 --prefix "$HOME/.npm-global"
-                if [ $? -eq 0 ]; then
-                  echo "cdktf-cli installed successfully."
-                else
-                  echo "Error: Failed to install cdktf-cli." >&2
-                fi
-              else
-                echo "cdktf-cli already installed."
-              fi
+              ensure_npm_pkg jsonschema @sourcemeta/jsonschema
+              ensure_npm_pkg cdk        aws-cdk
+              ensure_npm_pkg openspec   @fission-ai/openspec@latest
+              ensure_npm_pkg cdktf      cdktf@0.20.12 cdktf-cli@0.20.12
 
               # Base cloud configurations
               export AWS_CONFIG_FILE="$HOME/matchi/repos/matchi-utils/aws/config"

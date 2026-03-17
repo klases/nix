@@ -76,6 +76,7 @@
               bruno
               trivy
               bitwarden-desktop
+              bitwarden-cli
               starship
               btop
               ncdu
