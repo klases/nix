@@ -82,7 +82,7 @@
 
               ${extraShellHook}
 
-              LOGO_WIDTH=$(( ''${COLUMNS:-80} * 40 / 100 ))
+              LOGO_WIDTH=$(( ''${COLUMNS:-80} * 20 / 100 ))
               clear
               fastfetch --kitty-direct $HOME/.config/nix/nix-dev-envs/logos/${logo}.png --logo-width $LOGO_WIDTH
             '';
