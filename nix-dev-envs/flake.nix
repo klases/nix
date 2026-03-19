@@ -45,6 +45,7 @@
               eksctl
               # Node.js
               nodejs
+              pnpm
               # nodePackages.aws-cdk
               # nodePackages.cdktf-cli # Broken build on 25.05
               # Personal applications
@@ -182,7 +183,6 @@
           extraPackages = with pkgs; [
             bun
             yarn
-            pnpm
             # android-studio
           ];
           extraShellHook = ''
