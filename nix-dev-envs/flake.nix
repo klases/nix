@@ -20,7 +20,7 @@
           };
 
           # Base Shell with shared cloud tools + common utilities
-          baseShell = { extraPackages ? [ ], extraShellHook ? "" }: pkgs.mkShell {
+          baseShell = { extraPackages ? [ ], extraShellHook ? "", logo ? "base" }: pkgs.mkShell {
             packages = with pkgs; [
               # Core cli tools
               gh
@@ -80,6 +80,10 @@
               export AWS_CONFIG_FILE="$HOME/matchi/repos/matchi-utils/aws/config"
 
               ${extraShellHook}
+
+              LOGO_WIDTH=$(( ''${COLUMNS:-80} * 40 / 100 ))
+              clear
+              fastfetch --kitty-direct $HOME/.config/nix/nix-dev-envs/logos/${logo}.png --logo-width $LOGO_WIDTH
             '';
           };
         in
@@ -128,6 +132,7 @@
 
             echo "WebApp environment loaded with SDKMAN!"
           '';
+          logo = "webapp";
         };
 
         # Golang Environment (inherits base settings)
@@ -144,10 +149,8 @@
             export GOPATH=$HOME/go
             export GOPRIVATE="github.com/matchiapp"
             export PATH=$GOPATH/bin:$PATH
-
-            clear
-            fastfetch --kitty-direct $HOME/.config/nix/nix-dev-envs/gopher.png --logo-width 50 --logo-height 25
           '';
+          logo = "golang";
         };
 
         keycloak = baseShell {
@@ -170,10 +173,8 @@
           ];
           extraShellHook = ''
             export GOPRIVATE="github.com/matchiapp"
-
-            clear
-            fastfetch --kitty-direct $HOME/.config/nix/nix-dev-envs/kcTerm.png --logo-width 50 --logo-height 25
           '';
+          logo = "keycloak";
         };
 
         # Frontend Development Environment (inherits base settings)
@@ -189,6 +190,7 @@
             export PATH=$PATH:$ANDROID_HOME/emulator
             export PATH=$PATH:$ANDROID_HOME/platform-tools
           '';
+          logo = "frontend";
         };
 
         # Combined Fullstack (Golang + Frontend + GCP + Personal) Environment
@@ -236,12 +238,8 @@
             # No specific shell hooks were defined in the original GCP environment,
             # but if there were, they would be added here.
 
-            clear
-            # You can choose one of the fastfetch logos or combine them, or remove it.
-            # For example, using the gopher logo:
-            fastfetch --logo-width 50 --logo-height 25
-            echo "Fullstack (Golang + Frontend + GCP + Personal) environment loaded!"
           '';
+          logo = "fullstack";
         };
 
         }
