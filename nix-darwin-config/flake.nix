@@ -65,7 +65,9 @@
               gnupg
               coreutils
               gnumake
+              gnused
               openssl
+              python3
               certbot
               cosign
               docker-compose
@@ -85,10 +87,12 @@
               zed-editor.packages.${system}.default
               pkgs-unstable.ghostty-bin
               pkgs-unstable.claude-code
+              mas
             ];
 
             programs.zsh.enable = true;
             system.configurationRevision = self.rev or self.dirtyRev or null;
+            system.primaryUser = username;
             system.stateVersion = 6;
             nixpkgs.hostPlatform = system;
           }
@@ -101,6 +105,36 @@
               user = username;
               autoMigrate = true;
               enableRosetta = true;
+            };
+          }
+
+          # ✅ Declarative Homebrew package management
+          {
+            homebrew = {
+              enable = true;
+              casks = [
+                "1password"
+                "arc"
+                "bartender"
+                "displaylink"
+                "google-chrome"
+                "nordvpn"
+                "notion"
+                "orbstack"
+                "zoom"
+              ];
+              masApps = {
+                "Be Focused"          = 973134470;
+                "BetterSnapTool"      = 417375580;
+                "Disk Space Analyzer" = 446243721;
+                "GarageBand"          = 682658836;
+                "iMovie"              = 408981434;
+                "Keynote"             = 409183694;
+                "Numbers"             = 409203825;
+                "Pages"               = 409201541;
+                "Slack"               = 803453959;
+                "WireGuard"           = 1451685025;
+              };
             };
           }
 
