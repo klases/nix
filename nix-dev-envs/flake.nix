@@ -3,10 +3,11 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     openspec.url = "github:Fission-AI/OpenSpec";
   };
 
-  outputs = { self, nixpkgs, openspec }:
+  outputs = { self, nixpkgs, nixpkgs-unstable, openspec }:
     let
       supportedSystems = [ "aarch64-darwin" "x86_64-darwin" "x86_64-linux" "aarch64-linux" ];
       forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
@@ -17,6 +18,9 @@
           pkgs = import nixpkgs {
             inherit system;
             config.allowUnfree = true;
+          };
+          unstable = import nixpkgs-unstable {
+            inherit system;
           };
 
           # Base Shell with shared cloud tools + common utilities
@@ -78,7 +82,7 @@
               ensure_npm_pkg cdktf      cdktf@0.20.12 cdktf-cli@0.20.12
 
               # Base cloud configurations
-              export AWS_CONFIG_FILE="$HOME/matchi/repos/matchi-utils/aws/config"
+              export AWS_CONFIG_FILE="$HOME/workspace/matchi/matchi-utils/aws/config"
 
               ${extraShellHook}
 
@@ -141,7 +145,7 @@
           extraPackages = with pkgs; [
             go
             gosec
-            golangci-lint
+            unstable.golangci-lint
             go-tools
             hugo
             openapi-generator-cli
@@ -160,7 +164,7 @@
             # Golang
             go
             gosec
-            golangci-lint
+            unstable.golangci-lint
             go-tools
 
             # Frontend tools
@@ -199,7 +203,7 @@
             # From golang
             go
             gosec
-            golangci-lint
+            unstable.golangci-lint
             go-tools
             hugo
             openapi-generator-cli
