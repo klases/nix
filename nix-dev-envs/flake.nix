@@ -143,7 +143,7 @@
         # Golang Environment (inherits base settings)
         golang = baseShell {
           extraPackages = with pkgs; [
-            go
+            unstable.go
             gosec
             unstable.golangci-lint
             go-tools
@@ -162,7 +162,7 @@
           extraPackages = with pkgs; [
             # This shell is used for development of keycloak and should include all tools needed for development.
             # Golang
-            go
+            unstable.go
             gosec
             unstable.golangci-lint
             go-tools
@@ -201,7 +201,7 @@
         fullstack = baseShell {
           extraPackages = with pkgs; [
             # From golang
-            go
+            unstable.go
             gosec
             unstable.golangci-lint
             go-tools
