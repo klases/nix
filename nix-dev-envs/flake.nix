@@ -23,6 +23,20 @@
             inherit system;
           };
 
+          # Shared Go toolchain packages
+          goPackages = [
+            unstable.go
+            pkgs.gosec
+            unstable.golangci-lint
+            pkgs.go-tools
+          ];
+
+          goShellHook = ''
+            export GOPATH=$HOME/go
+            export GOPRIVATE="github.com/matchiapp"
+            export PATH=$GOPATH/bin:$PATH
+          '';
+
           # Base Shell with shared cloud tools + common utilities
           baseShell = { extraPackages ? [ ], extraShellHook ? "", logo ? "base" }: pkgs.mkShell {
             packages = with pkgs; [
@@ -142,31 +156,16 @@
 
         # Golang Environment (inherits base settings)
         golang = baseShell {
-          extraPackages = with pkgs; [
-            unstable.go
-            gosec
-            unstable.golangci-lint
-            go-tools
+          extraPackages = goPackages ++ (with pkgs; [
             hugo
             openapi-generator-cli
-          ];
-          extraShellHook = ''
-            export GOPATH=$HOME/go
-            export GOPRIVATE="github.com/matchiapp"
-            export PATH=$GOPATH/bin:$PATH
-          '';
+          ]);
+          extraShellHook = goShellHook;
           logo = "golang";
         };
 
         keycloak = baseShell {
-          extraPackages = with pkgs; [
-            # This shell is used for development of keycloak and should include all tools needed for development.
-            # Golang
-            unstable.go
-            gosec
-            unstable.golangci-lint
-            go-tools
-
+          extraPackages = goPackages ++ (with pkgs; [
             # Frontend tools
             yarn
             bun
@@ -175,7 +174,7 @@
             jdk21_headless
             gradle_8
             gradle-completion
-          ];
+          ]);
           extraShellHook = ''
             export GOPRIVATE="github.com/matchiapp"
           '';
@@ -199,27 +198,18 @@
 
         # Combined Fullstack (Golang + Frontend + GCP + Personal) Environment
         fullstack = baseShell {
-          extraPackages = with pkgs; [
-            # From golang
-            unstable.go
-            gosec
-            unstable.golangci-lint
-            go-tools
+          extraPackages = goPackages ++ (with pkgs; [
             hugo
             openapi-generator-cli
             # From frontend
             bun
             yarn
-            # android-studio (if needed, uncomment)
             # From GCP
             google-cloud-sdk
             firebase-tools
-          ];
+          ]);
           extraShellHook = ''
-            # From golang
-            export GOPATH=$HOME/go
-            export GOPRIVATE="github.com/matchiapp"
-            export PATH=$GOPATH/bin:$PATH
+            ${goShellHook}
 
             # From frontend
             export ANDROID_HOME=$HOME/Library/Android/sdk
