@@ -16,8 +16,9 @@
   outputs = { self, nixpkgs, nixpkgs-unstable, nix-darwin, mac-app-util, nix-homebrew, zed-editor }:
     let
       system = "aarch64-darwin";
+      hostname = "Claess-MacBook-Pro";
       username = "claeseklund";
-      homeDir = "/Users/${username}"; # ✅ Ensure absolute path
+      homeDir = "/Users/${username}";
       pkgs = import nixpkgs {
         inherit system;
         config.allowUnfree = true;
@@ -28,7 +29,7 @@
       };
     in
     {
-      darwinConfigurations."Claess-MacBook-Pro" = nix-darwin.lib.darwinSystem {
+      darwinConfigurations.${hostname} = nix-darwin.lib.darwinSystem {
         modules = [
           # ✅ System-Wide nix-darwin Configuration
           {
@@ -79,6 +80,10 @@
               trivy
               bitwarden-desktop
               bitwarden-cli
+              spotify
+              obsidian
+              _1password-cli
+              jetbrains.idea
               starship
               btop
               ncdu
@@ -93,6 +98,10 @@
             programs.zsh.enable = true;
             system.configurationRevision = self.rev or self.dirtyRev or null;
             system.primaryUser = username;
+            system.activationScripts.postActivation.text = ''
+              ln -sf ${homeDir}/.config/nix/nix-darwin-config/.zshrc ${homeDir}/.zshrc
+              ln -sf ${homeDir}/.config/nix/nix-darwin-config/.gitconfig ${homeDir}/.gitconfig
+            '';
             system.stateVersion = 6;
             nixpkgs.hostPlatform = system;
           }
@@ -118,9 +127,11 @@
                 "bartender"
                 "displaylink"
                 "google-chrome"
+                "karabiner-elements"
                 "nordvpn"
                 "notion"
                 "orbstack"
+                "vlc"
                 "zoom"
               ];
               masApps = {
