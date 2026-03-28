@@ -17,18 +17,11 @@ Personal nix setup for macOS using nix-darwin, nix-homebrew, and flakes.
 
 ## Symlinks
 
-Dotfiles are stored in `nix-darwin-config/` and symlinked to `$HOME`:
+Dotfiles are stored in `nix-darwin-config/` and automatically symlinked to `$HOME` by the nix-darwin activation script on every rebuild:
 
 ```
 ~/.zshrc      -> ~/.config/nix/nix-darwin-config/.zshrc
 ~/.gitconfig  -> ~/.config/nix/nix-darwin-config/.gitconfig
-```
-
-Create them with:
-
-```sh
-ln -sf ~/.config/nix/nix-darwin-config/.zshrc ~/.zshrc
-ln -sf ~/.config/nix/nix-darwin-config/.gitconfig ~/.gitconfig
 ```
 
 ## Dev Shells
@@ -68,6 +61,47 @@ nix-darwin-rebuild
 # Update dev environment flake inputs
 cd ~/.config/nix/nix-dev-envs && nix flake update
 ```
+
+## Fresh Machine Setup
+
+### Automated (handled by nix-darwin rebuild)
+
+- System CLI tools (ripgrep, fzf, bat, git, curl, etc.)
+- GUI apps via nix: Spotify, Obsidian, IntelliJ IDEA, 1Password CLI, Bitwarden, Discord, Bruno, DBeaver, Ghostty, Zed
+- GUI apps via brew casks: 1Password, Arc, Bartender, Chrome, DisplayLink, Karabiner-Elements, NordVPN, Notion, OrbStack, VLC, Zoom
+- Mac App Store apps: BetterSnapTool, Be Focused, Disk Space Analyzer, GarageBand, iMovie, Keynote, Numbers, Pages, Slack, WireGuard
+- Dotfile symlinks (.zshrc, .gitconfig)
+- Shell configuration (zsh, Starship prompt, Oh My Zsh)
+- Touch ID for sudo
+
+### Manual steps
+
+1. Install [Nix](https://nixos.org/download.html) with flakes enabled
+2. Install [nix-darwin](https://github.com/LnL7/nix-darwin)
+3. Clone this repo: `git clone <repo-url> ~/.config/nix`
+4. Update the `hostname` variable in `nix-darwin-config/flake.nix` to match the new machine name
+5. Run the initial rebuild:
+   ```sh
+   sudo darwin-rebuild switch --flake ~/.config/nix/nix-darwin-config
+   ```
+6. Update flake inputs:
+   ```sh
+   cd ~/.config/nix/nix-darwin-config && nix flake update
+   cd ~/.config/nix/nix-dev-envs && nix flake update
+   ```
+7. Set up SSH keys via 1Password SSH agent (`id_rsa` for personal, `id_matchi` for work)
+8. Install Xcode from the App Store (required for iOS/macOS development tools)
+9. Install Adobe Creative Cloud and apps (manual download)
+10. Sign in to Mac App Store (required for `masApps` to install)
+
+### Not managed by nix
+
+These require manual installation and are not portable:
+
+- Xcode (App Store only, includes CLI tools)
+- Adobe Creative Cloud + apps
+- DisplayLink driver (brew cask installs it, but driver activation is manual)
+- SSH keys (restore from 1Password or generate new ones)
 
 ## Prerequisites
 
